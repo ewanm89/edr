@@ -2,24 +2,22 @@ import os
 import sys
 
 import igmconfig
-import edrlog
 import textwrap
-
-EDRLOG = edrlog.EDRLog()
-
-try:
-    from EDMCOverlay import edmcoverlay
-except ImportError:
-    EDRLOG.log(u"EDR requires EDMCOverlay to display info while in-game. Go get it from: https://github.com/inorton/EDMCOverlay/releases", "ERROR")
-    raise Exception("Critical dependency missing")
-
 import lrucache
+import edrlog
+EDRLOG = edrlog.EDRLog()
+try:
+    import edmcoverlay
+    EDMC_OVERLAY_MISSING = False
+except ImportError:
+    EDMC_OVERLAY_MISSING = True
+    EDRLOG.log(u"EDR requires EDMCOverlay to display info while in-game. Go get it from: https://github.com/inorton/EDMCOverlay/releases", "ERROR")
 
 class InGameMsg(object):   
     MESSAGE_KINDS = [ "intel", "warning", "sitrep", "notice", "help"]
 
     def __init__(self):
-        self._overlay = edmcoverlay.Overlay()
+        self._overlay = None if EDMC_OVERLAY_MISSING else edmcoverlay.Overlay()
         self.cfg = {}
         self.general_config()
         self.must_clear = False
@@ -27,6 +25,9 @@ class InGameMsg(object):
             self.message_config(kind)
         self.msg_ids = lrucache.LRUCache(1000, 60*15)
 
+    def overlay_missing(self):
+        return EDMC_OVERLAY_MISSING
+    
     def general_config(self):
         conf = igmconfig.IGMConfig()
         self.cfg["general"] = {
@@ -230,6 +231,8 @@ class InGameMsg(object):
 
 
     def __display(self, kind, text, row, col, color="#dd5500", size="large", ttl=5):
+        if self._overlay is None:
+            return
         try:
             msg_id = "EDR-{}-{}".format(kind, row)
             self._overlay.send_message(msg_id, text, color, int(col), int(row), ttl=ttl, size=size)
@@ -239,6 +242,8 @@ class InGameMsg(object):
             pass
 
     def __shape(self, kind, panel):
+        if self._overlay is None:
+            return
         try:
             shape_id = "EDR-shape-{}-{}-{}-{}-{}".format(kind, panel["x"], panel["y"], panel["x2"], panel["y2"])
             self._overlay.send_shape(shape_id, "rect", panel["rgb"], panel["fill"], panel["x"], panel["y"], panel["x2"], panel["y2"], ttl=panel["ttl"])
@@ -248,6 +253,8 @@ class InGameMsg(object):
             pass
 
     def __clear(self, msg_id):
+        if self._overlay is None:
+            return
         try:
             self._overlay.send_message(msg_id, "", "", 0, 0, 0, 0)
             self.msg_ids.evict(msg_id)
@@ -261,5 +268,7 @@ class InGameMsg(object):
             self.cfg[kind]["b"]["cache"].reset()    
 
     def shutdown(self):
+        if self._overlay is None:
+            return
         # TODO self._overlay.shutdown() or something
         return

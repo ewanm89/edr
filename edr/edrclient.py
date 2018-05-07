@@ -236,6 +236,9 @@ class EDRClient(object):
 
     def warmup(self):
         EDRLOG.log(u"Warming up client.", "INFO")
+        if self.IN_GAME_MSG.overlay_missing() and self.visual_feedback:
+            self.__edmc_overlay_missing()
+
         # Translators: this is shown when EDR warms-up via the overlay
         details = [_(u"Check that Elite still has the focus!")]
         if self.mandatory_update:
@@ -305,11 +308,18 @@ class EDRClient(object):
         return frame
 
     def __status_update_pending(self):
-        # Translators: this is shown in EDMC's status
+        # Translators: this is shown via EDMC on the EDR status line
         self.status = _(u"mandatory EDR update!") if self.mandatory_update else _(u"please update EDR!")
         if self.status_ui:
             self.status_ui.underline = True
             self.status_ui.url = "https://github.com/lekeno/edr/releases/latest"
+        
+    def __edmc_overlay_missing(self):
+        # Translators: this is shown via EDMC on the EDR status line
+        self.status = _(u"Install EDMCOverlay for visual feedback")
+        if self.status_ui:
+            self.status_ui.underline = True
+            self.status_ui.url = "https://github.com/inorton/edmcoverlay/releases/latest"
             
 
     def prefs_changed(self):
@@ -326,6 +336,9 @@ class EDRClient(object):
         EDRLOG.log(u"Audio cues: {}, {}".format(config.get("EDRAudioFeedback"),
                                                 config.get("EDRAudioFeedbackVolume")), "DEBUG")
         self.login()
+        if self.IN_GAME_MSG.overlay_missing() and self.visual_feedback:
+            self.__edmc_overlay_missing()
+        
 
     def check_system(self, star_system):
         EDRLOG.log(u"Check system called: {}".format(star_system), "INFO")
