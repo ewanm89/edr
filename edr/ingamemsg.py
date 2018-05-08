@@ -6,12 +6,23 @@ import textwrap
 import lrucache
 import edrlog
 EDRLOG = edrlog.EDRLog()
+EDR_OVERLAY_DIST = os.path.join(os.path.abspath(os.path.dirname(__file__)), "EDMCOverlay")
 try:
     import edmcoverlay
     EDMC_OVERLAY_MISSING = False
+    EDMC_OVERLAY_OLD = False
 except ImportError:
-    EDMC_OVERLAY_MISSING = True
-    EDRLOG.log(u"EDR requires EDMCOverlay to display info while in-game. Go get it from: https://github.com/inorton/EDMCOverlay/releases", "ERROR")
+    try:
+        if EDR_OVERLAY_DIST not in sys.path:
+            sys.path.append(EDR_OVERLAY_DIST)
+        import edmcoverlay
+        EDMC_OVERLAY_MISSING = False
+        EDMC_OVERLAY_OLD = True
+        EDRLOG.log(u"The EDMCOverlay bundled with EDR is obsolete. Remove the 'EDMCOverlay' subfolder and install the latest version: https://github.com/inorton/EDMCOverlay/releases", "ERROR")
+    except ImportError:
+        EDMC_OVERLAY_MISSING = True
+        EDMC_OVERLAY_OLD = False
+        EDRLOG.log(u"EDR requires EDMCOverlay to display info while in-game. Go get it from: https://github.com/inorton/EDMCOverlay/releases", "ERROR")
 
 class InGameMsg(object):   
     MESSAGE_KINDS = [ "intel", "warning", "sitrep", "notice", "help"]
@@ -27,6 +38,9 @@ class InGameMsg(object):
 
     def overlay_missing(self):
         return EDMC_OVERLAY_MISSING
+
+    def old_overlay(self):
+        return EDMC_OVERLAY_OLD
     
     def general_config(self):
         conf = igmconfig.IGMConfig()

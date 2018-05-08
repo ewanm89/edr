@@ -236,8 +236,8 @@ class EDRClient(object):
 
     def warmup(self):
         EDRLOG.log(u"Warming up client.", "INFO")
-        if self.IN_GAME_MSG.overlay_missing() and self.visual_feedback:
-            self.__edmc_overlay_missing()
+        if self.visual_feedback:
+            self.__check_edmc_overlay()
 
         # Translators: this is shown when EDR warms-up via the overlay
         details = [_(u"Check that Elite still has the focus!")]
@@ -314,12 +314,22 @@ class EDRClient(object):
             self.status_ui.underline = True
             self.status_ui.url = "https://github.com/lekeno/edr/releases/latest"
         
-    def __edmc_overlay_missing(self):
-        # Translators: this is shown via EDMC on the EDR status line
-        self.status = _(u"Install EDMCOverlay for visual feedback")
-        if self.status_ui:
+    def __check_edmc_overlay(self):
+        found_issue = False
+        if self.IN_GAME_MSG.overlay_missing():
+            # Translators: this is shown via EDMC on the EDR status line
+            self.status = _(u"Install EDMCOverlay for visual feedback")
+            found_issue = True
+        elif self.IN_GAME_MSG.overlay_obsolete():
+            # Translators: this is shown via EDMC on the EDR status line
+            self.status = _(u"Obsolete EDMCOverlay detected, please upgrade!")
+            found_issue = True
+        
+        
+        if found_issue and self.status_ui:
             self.status_ui.underline = True
             self.status_ui.url = "https://github.com/inorton/edmcoverlay/releases/latest"
+        
             
 
     def prefs_changed(self):
@@ -336,8 +346,7 @@ class EDRClient(object):
         EDRLOG.log(u"Audio cues: {}, {}".format(config.get("EDRAudioFeedback"),
                                                 config.get("EDRAudioFeedbackVolume")), "DEBUG")
         self.login()
-        if self.IN_GAME_MSG.overlay_missing() and self.visual_feedback:
-            self.__edmc_overlay_missing()
+        self.__check_edmc_overlay()
         
 
     def check_system(self, star_system):
