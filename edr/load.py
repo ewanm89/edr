@@ -543,6 +543,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
     if entry["event"] in ["SendText"]:
         handle_commands(ed_player, entry)
 
+    if entry["event"] in ["LaunchDrone", "ProspectedAsteroid", "MiningRefined"]:
+        handle_mining_events(ed_player, entry)
+
     if status_outcome["updated"]:
         edr_update_cmdr_status(ed_player, status_outcome["reason"], entry["timestamp"])
         if ed_player.in_a_crew():
@@ -1123,6 +1126,14 @@ def handle_material_events(cmdr, entry, state):
         cmdr.inventory.traded(entry)
     elif entry["event"] == "MissionCompleted":
         cmdr.inventory.rewarded(entry)
+
+def handle_mining_events(cmdr, entry):
+    if entry["event"] == "LaunchDrone" and entry["Type"] in ["Prospector", "Collection"]:
+        pass
+    elif entry["event"] == "ProspectedAsteroid":
+        pass
+    elif entry["event"] == "MiningRefined":
+        pass
 	
 def handle_commands(cmdr, entry):
     if not entry["event"] == "SendText":
