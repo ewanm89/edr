@@ -81,7 +81,7 @@ class EDRLegalRecords(object):
     def __update_records_if_stale(self, cmdr_id):
         updated = False
         if self.__are_records_stale_for_cmdr(cmdr_id):
-            now = datetime.datetime.now() 
+            now = datetime.datetime.now()
             records = self.server.legal_stats(cmdr_id)
             self.records.set(cmdr_id, {"last_updated": now, "records": records})
             updated = True

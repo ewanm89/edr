@@ -396,7 +396,7 @@ class InGameMsg(object):
         alpha = math.radians(15)
         sin15 = math.sin(alpha)
         cos15 = math.cos(alpha)
-        sin45 = math.sqrt(2) / 2
+        sin45 = math.sqrt(2) / 2.0
         dodecagon = [
             (cos15, sin15),
             (cos15, -sin15),

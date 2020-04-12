@@ -971,7 +971,11 @@ class EDRClient(object):
             return its_actually_fine
 
         profile = self.cmdr(cmdr_name, check_inara_server=True)
-        legal = self.edrlegal.summarize(profile.cid)
+        try:
+            legal = self.edrlegal.summarize(profile.cid)
+        except CommsJammedError:
+            self.__commsjammed()
+            return False
         if profile and (self.player.name != cmdr_name) and profile.is_dangerous(self.player.powerplay):
             self.status = _(u"{} is bad news.").format(cmdr_name)
             if self.novel_enough_blip(cmdr_id, blip, cognitive = True):
