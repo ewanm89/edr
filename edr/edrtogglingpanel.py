@@ -8,14 +8,18 @@ except ImportError:
     # for Python3
     import tkinter as tk
     from tkinter import ttk
-
+import config as EDMCConfig
 from igmconfig import IGMConfig
 import ttkHyperlinkLabel
 
 class ToggledFrame(tk.Frame):
 
     def __init__(self, parent, label, status, show, *args, **options):
-        conf = IGMConfig(config_file='config/igm_alt_config.v3.ini', user_config_file=['config/user_igm_alt_config.v3.ini', 'config/user_igm_alt_config.v2.ini'])
+        theme=EDMCConfig.getint('theme')
+        if(theme)
+            conf = IGMConfig(config_file='config/igm_alt_config.v3.ini', user_config_file=['config/user_igm_alt_config.v3.ini', 'config/user_igm_alt_config.v2.ini'])
+        else
+            conf = IGMConfig(config_file='config/igm_light_config.v3.ini', user_config_file=['config/user_igm_light_config.v3.ini', 'config/user_igm_light_config.v2.ini'])
         tk.Frame.__init__(self, parent, *args, **options)
         fg = conf.rgb("status", "body")
         bg = conf.rgb("status", "fill")
